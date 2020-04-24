@@ -3,35 +3,46 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: whoami
-  namespace: whoami
+  namespace: ts
 spec:
   entryPoints:
     - http
-    - https
   routes:
-    - match: Host(`whoami.cert.containous.cloud`)
+    - match: Host(`whoami-staging.shapedo.com`)
       kind: Rule
       services:
         - name: whoami
           port: 80
-  tls:
-    secretName: whoami-cert
-
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: powpow
-  namespace: whoami
+  name: whoami-tls
+  namespace: ts
 spec:
   entryPoints:
-    - http
     - https
   routes:
-    - match: Host(`powpow.cert.containous.cloud`)
-      kind: Rule
-      services:
-        - name: whoami
-          port: 80
+  - match: Host(`whoami-staging.shapedo.com`)
+    kind: Rule
+    services:
+    - name: whoami
+      port: 80
   tls:
-    secretName: powpow-cert
+    secretName: whoami-cert
+    # certResolver: traefik-cert-manager-staging
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: whoami-cert
+  namespace: ts
+spec:
+  commonName: whoami-staging.shapedo.com
+  secretName: whoami-cert
+  dnsNames:
+    - whoami-staging.shapedo.com
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+
