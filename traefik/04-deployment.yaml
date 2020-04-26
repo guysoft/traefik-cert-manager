@@ -2,23 +2,36 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
+  labels:
+    app.kubernetes.io/name: traefik
   namespace: traefik
   name: traefik
   labels:
     app: traefik
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: traefik
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: traefik
         app: traefik
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8080'
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - traefik
       serviceAccountName: traefik-ingress-controller
       containers:
         - name: traefik
