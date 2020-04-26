@@ -2,36 +2,45 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: whoami
-  namespace: whoami
+  name: sync-tools
+  namespace: default
 spec:
   entryPoints:
     - http
-    - https
   routes:
     - match: Host(`whoami.cert.containous.cloud`)
       kind: Rule
       services:
-        - name: whoami
+        - name: sync-tools
           port: 80
-  tls:
-    secretName: whoami-cert
-
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: powpow
-  namespace: whoami
+  name: sync-tools-tls
+  namespace: default
 spec:
   entryPoints:
-    - http
     - https
   routes:
-    - match: Host(`powpow.cert.containous.cloud`)
-      kind: Rule
-      services:
-        - name: whoami
-          port: 80
+  - match: Host(`whoami.cert.containous.cloud`)
+    kind: Rule
+    services:
+      - name: sync-tools
+        port: 80
   tls:
-    secretName: powpow-cert
+    secretName: sync-tools-cert
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: sync-tools-cert
+  namespace: ts
+spec:
+  commonName: whoami.cert.containous.cloud
+  secretName: sync-tools-route-cert
+  dnsNames:
+    - whoami.cert.containous.cloud
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
