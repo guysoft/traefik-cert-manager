@@ -10,10 +10,16 @@ data:
       checkNewVersion = false
       sendAnonymousUsage = false
     [log]
-      level = "debug"
+      level = "WARN"
     [entryPoints]
       [entryPoints.http]
         address = ":80"
+      [entryPoints.http.http.redirections]
+        [entryPoints.http.http.redirections.entryPoint]
+          to = "https"
+          scheme = "https"
+          permanent = true
+          priority = 42
       [entryPoints.https]
         address = ":443"
         [entryPoints.https.http.tls]
@@ -24,6 +30,8 @@ data:
         ingressClass = "traefik-cert-manager"
     [api]
       dashboard = true
+      insecure = true
     [ping]
     [metrics]
       [metrics.prometheus]
+      buckets = [0.1,0.3,1.2,5.0]
